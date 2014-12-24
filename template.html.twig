@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block hd_js %}
+<script src="qrcode.js"></script>
+{% endblock %}
+
+{% block css %}
+<style>
+#container {
+    text-align: center;
+    margin-bottom: 40px;
+}
+#source {
+    width: 100%;
+}
+#qrcode {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+}
+#btnBar, #qrcode, #intro {
+    margin-top: 20px;
+}
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    padding-top: 20px;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="wrap">
+    <div id="container" class="container">
+        <div id="header">
+            <h1>QR code 產生器</h1>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div id="qrcode"></div>
+            </div>
+            <div class="col-md-6">
+                <h3>請輸入編碼內容</h3>
+                <textarea id="source" rows="10"></textarea>
+                <div id="btnBar">
+                    <button type="button" id="btnTrans" class="btn btn-default">轉換</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="intro">
+            <p>
+                將本工具加入書籤後，在瀏覽網頁時點選本書籤，<br />
+                將另開新頁轉換本頁網址為 QR 二維條碼。<br />
+                若在頁面中選取文字，則轉換選取內容。<br />
+            </p>
+            <a href="javascript: void(0);" id="btnBookmark" class="btn btn-default">
+                右鍵按我加到書籤
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block ft %}
+<div id="footer">
+    This project is a fork of <a href="https://github.com/davidshimjs/qrcodejs" target="_blank">qrcodejs</a>.
+</div>
+{% endblock %}
+
+{% block js %}
+{{ parent() }}
+
+<script>
+var qrcode = new QRCode($('#qrcode')[0], {
+    width: 300,
+    height: 300
+});
+
+$(function() {
+    var url = location.origin + location.pathname;
+    $('#btnBookmark').attr('href', "javascript:var%20t=((window.getSelection&&window.getSelection())||(document.getSelection&&document.getSelection())||(document.selection&&document.selection.createRange&&document.selection.createRange().text));if(t!=''){window.open('" + url + "?content='+encodeURIComponent(t),'qrcode'+Date.now());}else{window.open('" + url + "?content='+encodeURIComponent(location.href),'qrcode'+Date.now());}void(0);");
+
+    $('#btnTrans').on('click', makeCode);
+    $('#source').on('blur', makeCode);
+
+    var param = /\?content=(.+)/.exec(decodeURIComponent(location.search));
+    if (null == param) {
+        qrcode.makeCode(location.href);
+    } else {
+        $('#source').val(decodeURIComponent(param[1]));
+        makeCode();
+    }
+});
+
+function makeCode () {
+    var src = $('#source');
+
+    if ('' == src.val()) {
+        src.focus();
+        return;
+    }
+
+    qrcode.makeCode(src.val());
+}
+</script>
+{% endblock %}
